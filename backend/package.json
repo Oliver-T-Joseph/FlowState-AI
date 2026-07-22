@@ -1,7 +1,7 @@
 {
-  "name": "creative-task-coach-backend",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "Backend for the Creative Task Coach web app",
+  "description": "Backend for the creative task coach prototype",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
