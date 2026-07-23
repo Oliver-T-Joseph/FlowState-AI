@@ -19,30 +19,30 @@ Our solution is an AI-powered creative task coach that helps creative workers de
 ## How It Works
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  1. User enters a task (title, description, due date,   │
-│     category, importance) in the browser.               │
-│                                                         │
-│  2. The frontend sends the task to the Express backend  │
-│     via a POST request.                                 │
-│                                                         │
-│  3. The backend stores the task in a SQLite database.   │
-│                                                         │
-│  4. The AI service evaluates the task using OpenAI and  │
-│     returns a structured JSON response containing:      │
-│       • Difficulty score   (1–5)                        │
-│       • Estimated time     (minutes)                    │
-│       • Urgency level      (Low / Medium / High)        │
+┌────────────────────────────────────────────────────────────┐
+│  1. User enters a task (title, description, due date,      │
+│     category, importance) in the browser.                  │
+│                                                            │
+│  2. The frontend sends the task to the Express backend     │
+│     via a POST request.                                    │
+│                                                            │
+│  3. The backend stores the task in a SQLite database.      │
+│                                                            │
+│  4. The AI service evaluates the task using OpenAI and     │
+│     returns a structured JSON response containing:         │
+│       • Difficulty score   (1–5)                           │
+│       • Estimated time     (minutes)                       │
+│       • Urgency level      (Low / Medium / High)           │
 │       • Creative effort    (Light / Moderate / Deep Focus) │
-│       • Suggested first step                            │
-│       • Plain-language explanation                      │
-│                                                         │
-│  5. The backend stores the AI evaluation alongside      │
-│     the original task record.                           │
-│                                                         │
-│  6. The frontend receives the evaluation and displays   │
-│     the advice to the user.                             │
-└─────────────────────────────────────────────────────────┘
+│       • Suggested first step                               │
+│       • Plain-language explanation                         │
+│                                                            │
+│  5. The backend stores the AI evaluation alongside         │
+│     the original task record.                              │
+│                                                            │
+│  6. The frontend receives the evaluation and displays      │
+│     the advice to the user.                                │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
