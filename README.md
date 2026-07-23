@@ -1,38 +1,3 @@
-None selected 
-
-Skip to content
-Using University of Dayton Mail with screen readers
-
-5 of 10,900
-IBM Challenge
-Inbox
-
-Allison Estes
-Attachments
-12:43 PM (3 hours ago)
-to me
-
-Hi Oliver,
-
-Here is the README and demo script that IBM Bob helped me create. Please let me know what you think of it and what needs to be changed. Thanks!
-
-Best,
-
-Allie
-
---
-Allie Estes 
-University of Dayton Class of 2029
-School of Business Administration | Accounting & MIS
-Hanley Center for ESG Investing | Healthcare Analyst
-Delta Sigma Pi | VP of Professional 
-Women in Business | Recruitment Director 
-estesa6@udayton.edu | (614)-802-7933
- 2 Attachments
-  •  Scanned by Gmail
-
-
-
 # Creative Task Coach
 
 > An AI-powered web app that helps creative professionals decide what to work on — and how to begin.
