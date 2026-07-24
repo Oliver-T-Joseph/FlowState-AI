@@ -8,6 +8,11 @@ const cors = require("cors");
 //   saveDb  – call after any write (INSERT / UPDATE / DELETE) to persist to disk
 const { initDb, getDb, saveDb } = require("./database");
 
+// Import the AI evaluation helper.
+// evaluateCreativeTask() sends the task to OpenAI and returns
+// a structured evaluation object.
+const { evaluateCreativeTask } = require("./aiService");
+
 // ─── App Setup ──────────────────────────────────────────────────────────────
 const app = express();
 const PORT = 3001;
@@ -43,7 +48,8 @@ app.get("/api/health", (req, res) => {
  *   importance  : string  – e.g. "Low", "Medium", "High"
  * }
  */
-app.post("/api/tasks", (req, res) => {
+// The route handler is now async so we can use await with the AI call.
+app.post("/api/tasks", async (req, res) => {
   // Destructure the expected fields from the request body
   const { title, description, dueDate, category, importance } = req.body;
 
@@ -53,33 +59,37 @@ app.post("/api/tasks", (req, res) => {
   }
 
   try {
-    // Get the live database instance
+    // ── Step 1: Save the task to the database ────────────────────────────────
     const db = getDb();
 
-    // ── INSERT the task into the `tasks` table ───────────────────────────────
-    // We use a "prepared statement" with named placeholders (:title, :description …)
-    // to safely pass values – this prevents SQL injection attacks.
     db.run(
       `INSERT INTO tasks (title, description, due_date, category, importance)
        VALUES (:title, :description, :due_date, :category, :importance)`,
       {
         ":title":       title,
-        ":description": description  || null, // store NULL if not provided
+        ":description": description  || null,
         ":due_date":    dueDate       || null,
         ":category":    category      || null,
         ":importance":  importance    || null,
       }
     );
 
-    // ── Retrieve the id that SQLite gave to the new row ──────────────────────
-    // `lastInsertRowid` is a sql.js method that returns the id of the most
-    // recently inserted row in this database connection.
     const newId = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
-
-    // ── Save the updated database to disk ────────────────────────────────────
     saveDb();
 
-    // ── Respond with the saved task data ─────────────────────────────────────
+    // ── Step 2: Ask the AI to evaluate the task ──────────────────────────────
+    // evaluateCreativeTask() calls OpenAI and returns a structured object.
+    // It is async, so we use await to wait for it to finish before continuing.
+    const evaluation = await evaluateCreativeTask({
+      title,
+      description,
+      dueDate,
+      category,
+      importance,
+    });
+
+    // ── Step 3: Respond with both the saved task and the AI evaluation ───────
+    // The frontend reads the `evaluation` key to populate the result card.
     res.status(201).json({
       message: "Task saved!",
       task: {
@@ -90,11 +100,11 @@ app.post("/api/tasks", (req, res) => {
         category:    category    || null,
         importance:  importance  || null,
       },
+      evaluation,  // e.g. { difficulty_score, estimated_time, urgency_level, ... }
     });
   } catch (err) {
-    // Something went wrong with the database – log it and tell the client
-    console.error("Database error:", err.message);
-    res.status(500).json({ error: "Failed to save task." });
+    console.error("Error handling task:", err.message);
+    res.status(500).json({ error: err.message || "Failed to process task." });
   }
 });
 

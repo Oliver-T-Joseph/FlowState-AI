@@ -1,0 +1,439 @@
+/* ============================================================
+   style.css — Creative Task Coach
+   ============================================================
+   HOW THIS FILE IS ORGANISED:
+    1.  Reset & box-sizing
+    2.  Design tokens  (colours, font, spacing, radius)
+    3.  Base page
+    4.  Layout container
+    5.  Page header
+    6.  Form card
+    7.  Form groups  (label + input pairs)
+    8.  Side-by-side row
+    9.  Submit button
+   10.  Footer
+   11.  Utility: .hidden
+   12.  Loading message
+   13.  Button disabled state
+   14.  Error banner
+   15.  Result card
+   16.  Metric grid
+   17.  Suggested first step banner
+   18.  Explanation block
+   19.  Responsive  (<= 520 px)
+   ============================================================ */
+
+
+/* ── 1. Reset & box-sizing ──────────────────────────────────
+   Remove default browser margin/padding and make width
+   calculations include padding and border (easier maths). */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ── 2. Design tokens (CSS variables) ───────────────────────
+   Change a value here and it updates everywhere it is used. */
+:root {
+  /* Colours */
+  --color-bg:           #f0f2f8;   /* cool-tinted page background */
+  --color-surface:      #ffffff;   /* card / form background */
+  --color-border:       #e2e5ef;   /* subtle borders */
+  --color-border-focus: #4f46e5;   /* input border when active */
+  --color-text:         #1a1d2e;   /* near-black for headings & body */
+  --color-muted:        #64748b;   /* secondary text, labels */
+  --color-accent:       #4f46e5;   /* indigo — button & focus ring */
+  --color-accent-dark:  #3730a3;   /* button hover */
+  --color-accent-pale:  #eef2ff;   /* very light indigo for badge bg */
+
+  /* Green used for the first-step banner */
+  --color-green:        #059669;
+  --color-green-pale:   #ecfdf5;
+
+  /* Red used for error banners */
+  --color-red:          #dc2626;
+  --color-red-pale:     #fef2f2;
+
+  /* Typography */
+  --font-base: -apple-system, "Segoe UI", system-ui, sans-serif;
+
+  /* Spacing */
+  --space-xs:  0.35rem;
+  --space-sm:  0.6rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+
+  /* Shape */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* Shadow — one definition used on all cards */
+  --shadow-card: 0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.06);
+}
+
+
+/* ── 3. Base page ───────────────────────────────────────────
+   Default font, background, and comfortable line-height. */
+body {
+  font-family: var(--font-base);
+  font-size: 15px;
+  line-height: 1.65;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* Extra top padding so the header has air above it */
+  padding: var(--space-xl) var(--space-md) 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ── 4. Layout container ────────────────────────────────────
+   Centres the content column and adds vertical rhythm. */
+.container {
+  max-width: 660px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  /* Allow the container to grow so the footer is pushed to the bottom */
+  flex: 1;
+  padding-bottom: var(--space-xl);
+}
+
+
+/* ── 5. Page header ─────────────────────────────────────────
+   Centred title with a small "AI-Powered" badge above it. */
+.app-header {
+  text-align: center;
+  padding: var(--space-lg) 0 var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* The small pill badge — e.g. "AI-Powered" */
+.app-badge {
+  display: inline-block;
+  background: var(--color-accent-pale);
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;           /* fully rounded pill shape */
+  border: 1px solid #c7d2fe;      /* light indigo border */
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.app-header .subtitle {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  max-width: 400px;               /* prevent the tagline from becoming too wide */
+}
+
+
+/* ── 6. Form card ───────────────────────────────────────────
+   White card with a shadow that lifts it off the background. */
+.task-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+
+/* ── 7. Individual form groups (label + input pairs) ────────
+   Each label sits above its input with a consistent gap. */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* Shared styles for text inputs, textareas, and selects */
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: var(--font-base);   /* stop browsers switching to serif */
+  color: var(--color-text);
+  background: var(--color-surface);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Blue ring on focus — makes it clear which field is active */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* Only resize textarea up/down, not sideways */
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+
+/* ── 8. Side-by-side row ─────────────────────────────────────
+   Category and Importance dropdowns sit next to each other. */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+
+/* ── 9. Submit button ────────────────────────────────────────
+   Full-width indigo button with a subtle upward hover shift. */
+.btn-analyze {
+  /* Full width so it anchors the bottom of the form */
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  font-size: 0.97rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  /* Shift up 1px on hover to give a subtle "lift" feel */
+  transition: background-color 0.15s, transform 0.1s;
+  margin-top: var(--space-xs);    /* a little extra breathing room above the button */
+}
+
+.btn-analyze:hover {
+  background-color: var(--color-accent-dark);
+  transform: translateY(-1px);
+}
+
+/* Bring back to normal position when clicked */
+.btn-analyze:active {
+  transform: translateY(0);
+}
+
+
+/* ── 10. Footer ──────────────────────────────────────────────
+   A thin line at the very bottom of the page. */
+.app-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-muted);
+  padding: var(--space-md) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  margin-top: auto;               /* pushes footer to the bottom */
+}
+
+
+/* ── 11. Utility — hidden class ──────────────────────────────
+   Adding class="hidden" to any element makes it invisible.
+   Removing the class (via JS) makes it visible again. */
+.hidden {
+  display: none;
+}
+
+
+/* ── 12. Loading message ─────────────────────────────────────
+   Shown inside the result card while waiting for the API. */
+.result-loading {
+  font-size: 0.92rem;
+  color: var(--color-muted);
+  font-style: italic;
+  padding: var(--space-xs) 0;
+}
+
+
+/* ── 13. Button disabled state ───────────────────────────────
+   Dims the button and changes the cursor while the API runs. */
+.btn-analyze:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;                /* no hover lift when disabled */
+}
+
+
+/* ── 14. Error banner ────────────────────────────────────────
+   Red left-border block shown when the fetch() call fails. */
+.result-error {
+  background: var(--color-red-pale);
+  border-left: 4px solid var(--color-red);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--space-md);
+  font-size: 0.93rem;
+  color: #991b1b;
+  line-height: 1.55;
+}
+
+
+/* ── 15. Result card ─────────────────────────────────────────
+   Matches the form card visually — same shadow and radius.
+   A top accent stripe gives it a distinct "results" identity. */
+.result-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  /* Top border stripe in indigo to visually separate it from the form */
+  border-top: 3px solid var(--color-accent);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.result-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  color: var(--color-text);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+/* ── 16. Metric grid ─────────────────────────────────────────
+   Four tiles in two equal columns. */
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* Each tile */
+.metric-tile {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Small uppercase label */
+.metric-tile__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-muted);
+}
+
+/* Bold value */
+.metric-tile__value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+
+/* ── 17. Suggested first step banner ─────────────────────────
+   Green left-border accent — the most prominent item in the card. */
+.result-step {
+  background: var(--color-green-pale);
+  border-left: 4px solid var(--color-green);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.result-step__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-green);
+}
+
+.result-step__value {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+
+/* ── 18. Explanation block ───────────────────────────────────
+   Plain prose below the metrics — larger line-height for readability. */
+.result-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+.result-explanation__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-muted);
+}
+
+.result-explanation__value {
+  font-size: 0.94rem;
+  color: var(--color-text);
+  line-height: 1.7;
+}
+
+
+/* ── 19. Responsive — small screens (<= 520px) ───────────────
+   Stack two-column layouts to one column on phones. */
+@media (max-width: 520px) {
+
+  body {
+    padding-top: var(--space-lg);
+  }
+
+  .app-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .task-form,
+  .result-card {
+    padding: var(--space-lg);
+  }
+
+  .form-row,
+  .result-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -1,16 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Creative Task Coach</title>
+
+  <!-- Link to our external stylesheet -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+<body>
 
-  <body>
+  <div class="container">
 
-    <h1>Creative Task Coach</h1>
+    <!-- ── Page header ── -->
+    <header class="app-header">
+      <!-- Badge label above the title — gives the page a clear identity at a glance -->
+      <span class="app-badge">AI-Powered</span>
+      <h1>Creative Task Coach</h1>
+      <p class="subtitle">Describe your creative task and get an instant AI evaluation.</p>
+    </header>
 
-    <p>
-      Enter a creative task and receive AI-powered advice on how to begin.
-    </p>
+    <!-- ── Task form ── -->
+    <!-- The id="task-form" lets script.js find this form easily -->
+    <form id="task-form" class="task-form" novalidate>
 
-  </body>
+      <!-- Task Title -->
+      <div class="form-group">
+        <label for="task-title">Task Title</label>
+        <input
+          type="text"
+          id="task-title"
+          name="title"
+          placeholder="e.g. Design a podcast logo"
+          required
+        />
+      </div>
+
+      <!-- Task Description -->
+      <div class="form-group">
+        <label for="task-description">Task Description</label>
+        <textarea
+          id="task-description"
+          name="description"
+          rows="4"
+          placeholder="Describe what the task involves..."
+        ></textarea>
+      </div>
+
+      <!-- Due Date -->
+      <div class="form-group">
+        <label for="due-date">Due Date</label>
+        <input type="date" id="due-date" name="dueDate" />
+      </div>
+
+      <!-- Two dropdowns side-by-side on wider screens -->
+      <div class="form-row">
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            <option value="Writing">Writing</option>
+            <option value="Design">Design</option>
+            <option value="Video">Video</option>
+            <option value="Audio">Audio</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Review">Review</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Importance -->
+        <div class="form-group">
+          <label for="importance">Importance</label>
+          <select id="importance" name="importance">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+      </div><!-- /.form-row -->
+
+      <!-- Submit button -->
+      <button type="submit" id="submit-btn" class="btn-analyze">Analyze Task</button>
+
+    </form><!-- /#task-form -->
+
+    <!-- ── Result card ──────────────────────────────────────────
+         This section is hidden by default (class="hidden").
+         script.js removes that class once the form is submitted,
+         which makes the card appear on the page.
+         Each element with an id is a "slot" that JS will fill in. -->
+    <section id="result-card" class="result-card hidden" aria-live="polite">
+
+      <!-- ── Loading message ───────────────────────────────────────
+           Shown while we wait for the backend to respond.
+           script.js hides this and shows the results once they arrive. -->
+      <p id="result-loading" class="result-loading hidden">
+        Analyzing your task — this may take a few seconds...
+      </p>
+
+      <h2 class="result-card__title">Task Evaluation</h2>
+
+      <!-- Four metric tiles in a 2-column grid -->
+      <div class="result-grid">
+
+        <!-- Difficulty Score (e.g. "7 / 10") -->
+        <div class="metric-tile">
+          <span class="metric-tile__label">Difficulty Score</span>
+          <span class="metric-tile__value" id="result-difficulty">—</span>
+        </div>
+
+        <!-- Estimated Time (e.g. "3 – 5 hours") -->
+        <div class="metric-tile">
+          <span class="metric-tile__label">Estimated Time</span>
+          <span class="metric-tile__value" id="result-time">—</span>
+        </div>
+
+        <!-- Urgency Level (e.g. "Medium") -->
+        <div class="metric-tile">
+          <span class="metric-tile__label">Urgency Level</span>
+          <span class="metric-tile__value" id="result-urgency">—</span>
+        </div>
+
+        <!-- Creative Effort (e.g. "High") -->
+        <div class="metric-tile">
+          <span class="metric-tile__label">Creative Effort</span>
+          <span class="metric-tile__value" id="result-effort">—</span>
+        </div>
+
+      </div><!-- /.result-grid -->
+
+      <!-- Suggested first step — a highlighted action banner -->
+      <div class="result-step">
+        <p class="result-step__label">Suggested First Step</p>
+        <p class="result-step__value" id="result-first-step">—</p>
+      </div>
+
+      <!-- Explanation — a longer paragraph of reasoning -->
+      <div class="result-explanation">
+        <p class="result-explanation__label">Explanation</p>
+        <p class="result-explanation__value" id="result-explanation">—</p>
+      </div>
+
+    </section><!-- /#result-card -->
+
+  </div><!-- /.container -->
+
+  <!-- Footer sits outside the container so it spans the full page width -->
+  <footer class="app-footer">Made with IBM Bob</footer>
+
+  <!-- Link to our external JavaScript file (placed at the end so the HTML loads first) -->
+  <script src="script.js"></script>
+</body>
 </html>
