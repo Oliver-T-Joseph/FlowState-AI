@@ -24,9 +24,9 @@
 // ============================================================
 
 
-// ── URL of the backend endpoint ─────────────────────────────
-// Change this if your backend runs on a different port or host.
-var API_URL = "http://localhost:3001/api/tasks";
+// ── Backend URL ──────────────────────────────────────────────
+// PORT=3000 is set in backend/.env — update this if you change it.
+var TASKS_URL = "http://localhost:3000/api/tasks";
 
 
 // Wait until the browser has finished building the page (the DOM)
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
       //   method  – "POST" means we are sending data (not just reading it)
       //   headers – tells the backend the body is JSON text
       //   body    – the actual data, converted to a JSON string
-      var response = await fetch(API_URL, {
+      var response = await fetch(TASKS_URL, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(taskData),

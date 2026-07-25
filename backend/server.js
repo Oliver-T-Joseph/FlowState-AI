@@ -1,4 +1,8 @@
 // ─── Imports ────────────────────────────────────────────────────────────────
+// dotenv loads the variables in backend/.env into process.env so we can
+// read PORT, OPENAI_API_KEY etc. without hard-coding them here.
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 
@@ -11,11 +15,14 @@ const { initDb, getDb, saveDb } = require("./database");
 // Import the AI evaluation helper.
 // evaluateCreativeTask() sends the task to OpenAI and returns
 // a structured evaluation object.
-const { evaluateCreativeTask } = require("./aiService");
+const { evaluateCreativeTask, gradeTask } = require("./aiService");
 
 // ─── App Setup ──────────────────────────────────────────────────────────────
 const app = express();
-const PORT = 3001;
+
+// Read PORT from the .env file (PORT=3000) so the server and frontend agree.
+// Falls back to 3001 if the variable is not set.
+const PORT = process.env.PORT || 3001;
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 // Allow requests from any origin (e.g. the React frontend on localhost:3000)
@@ -105,6 +112,48 @@ app.post("/api/tasks", async (req, res) => {
   } catch (err) {
     console.error("Error handling task:", err.message);
     res.status(500).json({ error: err.message || "Failed to process task." });
+  }
+});
+
+/**
+ * POST /api/grade
+ * Accepts a task and a user's completed submission, then asks the AI to
+ * grade the submission against the task requirements.
+ *
+ * Expected request body:
+ * {
+ *   taskTitle       : string  – the name of the task being graded
+ *   taskDescription : string  – what the task required
+ *   submission      : string  – the work the user is submitting for grading
+ * }
+ *
+ * Returns:
+ * {
+ *   grade: {
+ *     score        : number (0–100)
+ *     status       : "Pass" | "Needs Revision"
+ *     explanation  : string
+ *     strengths    : string
+ *     improvement  : string
+ *   }
+ * }
+ */
+app.post("/api/grade", async (req, res) => {
+  const { taskTitle, taskDescription, submission } = req.body;
+
+  // Submission is the one required field — no submission means nothing to grade.
+  if (!submission || submission.trim() === "") {
+    return res.status(400).json({ error: "A submission is required to grade." });
+  }
+
+  try {
+    const grade = await gradeTask({ taskTitle, taskDescription, submission });
+    res.status(200).json({ grade });
+  } catch (err) {
+    // Log the full error on the server but only send a safe message to the client.
+    // This ensures the API key is never accidentally exposed in an error response.
+    console.error("Grade route error:", err.message);
+    res.status(500).json({ error: err.message || "Failed to grade submission." });
   }
 });
 
