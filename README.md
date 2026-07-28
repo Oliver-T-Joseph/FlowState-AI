@@ -131,7 +131,7 @@ IBM_JulyCodingChallenge/
 | Graham Tucker-Camou | Backend |
 | Drew Hall | Frontend |
 | Allie Estes | Documentation |
-
+| Yoni Mendez Antonio | Frontend |
 > Replace the placeholders above with your team's actual names and roles before submitting.
 
 ---
