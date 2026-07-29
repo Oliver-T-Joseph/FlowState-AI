@@ -6,16 +6,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-// Import the three helpers from our database module:
-//   initDb  – call once at startup to load/create the database file
-//   getDb   – call anywhere you need to run a query
-//   saveDb  – call after any write (INSERT / UPDATE / DELETE) to persist to disk
-const { initDb, getDb, saveDb } = require("./database");
-
 // Import the AI evaluation helper.
 // evaluateCreativeTask() sends the task to OpenAI and returns
 // a structured evaluation object.
-const { evaluateCreativeTask, gradeTask } = require("./aiService");
+const { evaluateCreativeTask } = require("./aiService");
 
 // ─── App Setup ──────────────────────────────────────────────────────────────
 const app = express();
@@ -43,8 +37,8 @@ app.get("/api/health", (req, res) => {
 
 /**
  * POST /api/tasks
- * Receives a new task from the frontend, saves it to the database,
- * and returns the saved task (including its new auto-generated id).
+ * Receives a task from the frontend, sends it to OpenAI for evaluation,
+ * and returns the structured evaluation result.
  *
  * Expected request body:
  * {
@@ -55,7 +49,6 @@ app.get("/api/health", (req, res) => {
  *   importance  : string  – e.g. "Low", "Medium", "High"
  * }
  */
-// The route handler is now async so we can use await with the AI call.
 app.post("/api/tasks", async (req, res) => {
   // Destructure the expected fields from the request body
   const { title, description, dueDate, category, importance } = req.body;
@@ -66,27 +59,8 @@ app.post("/api/tasks", async (req, res) => {
   }
 
   try {
-    // ── Step 1: Save the task to the database ────────────────────────────────
-    const db = getDb();
-
-    db.run(
-      `INSERT INTO tasks (title, description, due_date, category, importance)
-       VALUES (:title, :description, :due_date, :category, :importance)`,
-      {
-        ":title":       title,
-        ":description": description  || null,
-        ":due_date":    dueDate       || null,
-        ":category":    category      || null,
-        ":importance":  importance    || null,
-      }
-    );
-
-    const newId = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
-    saveDb();
-
-    // ── Step 2: Ask the AI to evaluate the task ──────────────────────────────
+    // Ask the AI to evaluate the task.
     // evaluateCreativeTask() calls OpenAI and returns a structured object.
-    // It is async, so we use await to wait for it to finish before continuing.
     const evaluation = await evaluateCreativeTask({
       title,
       description,
@@ -95,12 +69,11 @@ app.post("/api/tasks", async (req, res) => {
       importance,
     });
 
-    // ── Step 3: Respond with both the saved task and the AI evaluation ───────
+    // Respond with the task echo and the AI evaluation.
     // The frontend reads the `evaluation` key to populate the result card.
     res.status(201).json({
-      message: "Task saved!",
+      message: "Task analyzed!",
       task: {
-        id:          newId,
         title,
         description: description || null,
         due_date:    dueDate     || null,
@@ -115,58 +88,7 @@ app.post("/api/tasks", async (req, res) => {
   }
 });
 
-/**
- * POST /api/grade
- * Accepts a task and a user's completed submission, then asks the AI to
- * grade the submission against the task requirements.
- *
- * Expected request body:
- * {
- *   taskTitle       : string  – the name of the task being graded
- *   taskDescription : string  – what the task required
- *   submission      : string  – the work the user is submitting for grading
- * }
- *
- * Returns:
- * {
- *   grade: {
- *     score        : number (0–100)
- *     status       : "Pass" | "Needs Revision"
- *     explanation  : string
- *     strengths    : string
- *     improvement  : string
- *   }
- * }
- */
-app.post("/api/grade", async (req, res) => {
-  const { taskTitle, taskDescription, submission } = req.body;
-
-  // Submission is the one required field — no submission means nothing to grade.
-  if (!submission || submission.trim() === "") {
-    return res.status(400).json({ error: "A submission is required to grade." });
-  }
-
-  try {
-    const grade = await gradeTask({ taskTitle, taskDescription, submission });
-    res.status(200).json({ grade });
-  } catch (err) {
-    // Log the full error on the server but only send a safe message to the client.
-    // This ensures the API key is never accidentally exposed in an error response.
-    console.error("Grade route error:", err.message);
-    res.status(500).json({ error: err.message || "Failed to grade submission." });
-  }
-});
-
 // ─── Start Server ─────────────────────────────────────────────────────────────
-// We must wait for the database to be ready before accepting requests,
-// so we wrap the app.listen call inside the async initDb() call.
-initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to initialise database:", err.message);
-    process.exit(1); // stop the process if the database can't start
-  });
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

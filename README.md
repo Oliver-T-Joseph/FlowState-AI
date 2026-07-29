@@ -1,18 +1,20 @@
 # Creative Task Coach
 
-> An AI-powered web app that helps creative professionals decide what to work on — and how to begin.
+> An AI-powered single-task analyzer that helps creative professionals understand and begin their work.
 
 ---
 
 ## Problem Statement
 
-Creative professionals often struggle to decide what to work on first because creative tasks vary widely in urgency, complexity, effort, and impact. Traditional to-do lists organize tasks, but they do not help creators understand which task deserves attention first or how demanding each task may be.
+Creative professionals often struggle to decide how to begin a task because creative work varies widely in urgency, complexity, effort, and impact. This tool evaluates any individual creative task and gives the user concrete, actionable guidance on where to start.
 
 ---
 
 ## Solution Description
 
-Our solution is an AI-powered creative task coach that helps creative workers decide how to begin their work. Users enter a task, and the app evaluates it based on difficulty, estimated time, urgency, creative effort, and importance. The app then gives the user a suggested first step and a short explanation.
+Creative Task Coach is an AI-powered single-task analyzer. The user submits one creative task at a time, and the app evaluates it based on difficulty, estimated time, urgency, creative effort, and importance. The app then provides a suggested first step and a plain-language explanation of the evaluation.
+
+Tasks and evaluations are **not stored**. Refreshing or closing the page does not preserve an analysis. The backend exists to protect the OpenAI API key and communicate securely with the OpenAI API — it does not persist any data.
 
 ---
 
@@ -26,10 +28,8 @@ Our solution is an AI-powered creative task coach that helps creative workers de
 │  2. The frontend sends the task to the Express backend     │
 │     via a POST request.                                    │
 │                                                            │
-│  3. The backend stores the task in a SQLite database.      │
-│                                                            │
-│  4. The AI service evaluates the task using OpenAI and     │
-│     returns a structured JSON response containing:         │
+│  3. The backend requests a structured evaluation from      │
+│     OpenAI and returns a JSON response containing:         │
 │       • Difficulty score   (1–5)                           │
 │       • Estimated time     (minutes)                       │
 │       • Urgency level      (Low / Medium / High)           │
@@ -37,11 +37,7 @@ Our solution is an AI-powered creative task coach that helps creative workers de
 │       • Suggested first step                               │
 │       • Plain-language explanation                         │
 │                                                            │
-│  5. The backend stores the AI evaluation alongside         │
-│     the original task record.                              │
-│                                                            │
-│  6. The frontend receives the evaluation and displays      │
-│     the advice to the user.                                │
+│  4. The frontend immediately displays the evaluation.      │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,10 +49,10 @@ Our solution is an AI-powered creative task coach that helps creative workers de
 |---|---|---|
 | Frontend | HTML, CSS, JavaScript | User interface — task entry form and results display |
 | Backend | Node.js, Express | REST API server — routes and request handling |
-| Database | SQLite | Persistent storage for tasks and AI evaluations |
 | AI | OpenAI API (structured output / JSON schema) | Task evaluation — scoring, effort rating, first-step advice |
 | Dev tooling | dotenv | Environment variable management (API keys) |
-| Assistant | IBM Bob | Code generation, debugging, and README authoring (see below) |
+| Dev tooling | CORS | Cross-origin request handling |
+| Assistant | IBM Bob | Development assistance (see below) |
 
 ---
 
@@ -64,11 +60,12 @@ Our solution is an AI-powered creative task coach that helps creative workers de
 
 IBM Bob was used throughout the development of this project as a coding assistant and documentation partner:
 
+- **Express backend development** — Helped scaffold the Express server, routes, request validation, and error handling in `server.js`.
+- **OpenAI integration** — Assisted with the structured-output integration in `aiService.js`, including the JSON schema, response validation, and error handling for API failures.
+- **Structured JSON schema** — Assisted in designing the evaluation schema (difficulty score, urgency, creative effort, suggested first step) used to enforce structured responses from the OpenAI API.
 - **Debugging** — Identified and explained issues in the backend and frontend code, including API integration errors and response-handling bugs.
-- **Code generation** — Helped scaffold the Express server, the OpenAI structured-output integration in `aiService.js`, and the SQLite database layer in `database.js`.
-- **Schema design** — Assisted in designing the JSON evaluation schema (difficulty score, urgency, creative effort, suggested first step) used to enforce structured responses from the OpenAI API.
 - **Documentation** — Wrote and refined this README, ensuring the problem statement, solution description, and architecture flow were clearly expressed.
-- **Code review** — Reviewed code for correctness, best practices, and potential runtime errors before testing.
+- **Repository cleanup** — Assisted with removing unnecessary persistence code (database layer, SQL inserts, grading feature) to simplify the application to a single-task analyzer.
 
 ---
 
@@ -82,9 +79,10 @@ IBM_JulyCodingChallenge/
 │   └── script.js        # Fetch calls and DOM updates
 └── backend/
     ├── server.js        # Express server and API routes
-    ├── database.js      # SQLite setup and query helpers
     ├── aiService.js     # OpenAI integration and evaluation logic
-    └── package.json     # Dependencies and start scripts
+    ├── testOpenAI.js    # Quick script to verify the OpenAI connection
+    ├── package.json     # Dependencies and start scripts
+    └── package-lock.json
 ```
 
 ---
@@ -102,24 +100,28 @@ IBM_JulyCodingChallenge/
 3. Create a `.env` file inside `backend/`:
    ```
    OPENAI_API_KEY=your_key_here
-   OPENAI_MODEL=gpt-4o
+   OPENAI_MODEL=gpt-5-mini
+   PORT=3000
    ```
+   > `PORT=3000` must match the URL used by `frontend/script.js` (`http://localhost:3000/api/tasks`). If you change the port here you must also update that URL in the frontend.
 4. Start the server:
    ```bash
    npm start
    ```
-5. Open `frontend/index.html` in a browser.
+5. Open `frontend/index.html` directly in a browser.
+
+No database setup, migration, or initialization is required.
 
 ---
 
 ## Future Improvements
 
-- **User accounts** — Allow users to save and revisit past task evaluations across sessions.
-- **Task prioritization view** — Display all saved tasks ranked by urgency and difficulty so users can see their full workload at a glance.
-- **Real AI model integration** — Replace or augment the current OpenAI call with a fine-tuned model trained specifically on creative workflow patterns.
-- **Mobile-responsive design** — Optimize the frontend layout for phones and tablets.
-- **Export to calendar** — Let users export the suggested first step and estimated time directly to Google Calendar or iCal.
-- **Team mode** — Support multiple users on a shared task board so creative teams can coach each other.
+- **Better task input guidance** — Add placeholder text and inline tips to help users write more useful task descriptions.
+- **More detailed evaluation categories** — Expand the evaluation to include additional dimensions such as risk level or collaboration requirements.
+- **Adjustable analysis styles** — Let users choose between a brief or detailed evaluation style.
+- **Improved mobile responsiveness** — Optimize the frontend layout for phones and tablets.
+- **Export or copy an individual evaluation** — Add a button to copy the evaluation to the clipboard or export it as a text file.
+- **Additional validation and accessibility** — Improve form validation messages and keyboard/screen-reader accessibility.
 
 ---
 
@@ -132,10 +134,7 @@ IBM_JulyCodingChallenge/
 | Drew Hall | Frontend |
 | Allie Estes | Documentation |
 | Yoni Mendez Antonio | Frontend |
-> Replace the placeholders above with your team's actual names and roles before submitting.
 
 ---
 
 *Built for the IBM July Coding Challenge.*
-README.md
-Displaying README.md.
