@@ -3,8 +3,8 @@
 ## Group Members
 - Oliver Joseph
 - Hunter Clay
-- Zwe Htit
-- ...
+- Zwe Htet
+- Viet Quoc Dat Le
 
 ## Project Selection
 Option 2
